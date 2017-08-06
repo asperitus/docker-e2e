@@ -1,0 +1,12 @@
+#
+,git
+.gitignore
+local
+node_modules
+temp
+#
+build.sh
+client.sh
+docker.sh
+
+README.md
