@@ -68,12 +68,25 @@ RUN npm install --unsafe-perm -g \
     && webdriver-manager clean \
     && webdriver-manager update --versions.standalone=3.5.0 --versions.chrome=2.31 --ignore_ssl --chrome true --gecko false --verbose
 
+#sshd
+RUN apt-get update && apt-get install -y openssh-server \
+    && mkdir /var/run/sshd \
+    && echo 'root:nosecret' | chpasswd \
+    && sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    # SSH login fix. Otherwise user is kicked off after login
+    && sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
+
+#
+RUN npm install -g protractor-flake
+
+##
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
+
 ####
 RUN ln -sf bash /bin/sh
 
 ENV PATH /opt/R/bin:$PATH
-
-EXPOSE 8080
 
 WORKDIR /app
 
@@ -84,4 +97,10 @@ COPY . .
 
 RUN chmod a+x .
 
+##
+
+EXPOSE 22
+#CMD ["/usr/sbin/sshd", "-D"]
+
+EXPOSE 8080
 CMD [ "npm", "start" ]
